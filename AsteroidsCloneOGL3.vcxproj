@@ -108,11 +108,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_mixer.lib;SDL2_image.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_mixer.lib;SDL2_image.lib;glew32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -140,10 +141,14 @@
     <ClInclude Include="include\Game.h" />
     <ClInclude Include="include\Math.h" />
     <ClInclude Include="include\Random.h" />
+    <ClInclude Include="include\Shader.h" />
+    <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\Structures.h" />
+    <ClInclude Include="include\Texture.h" />
     <ClInclude Include="include\TextureManager.h" />
     <ClInclude Include="include\Timer.h" />
     <ClInclude Include="include\Utilities.h" />
+    <ClInclude Include="include\VertexArray.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Actor.cpp" />
@@ -153,8 +158,12 @@
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Math.cpp" />
     <ClCompile Include="src\Random.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\stb_image.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\TextureManager.cpp" />
     <ClCompile Include="src\Timer.cpp" />
+    <ClCompile Include="src\VertexArray.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

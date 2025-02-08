@@ -51,6 +51,18 @@
     <ClInclude Include="include\Utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\VertexArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Actor.cpp">
@@ -78,6 +90,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VertexArray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stb_image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

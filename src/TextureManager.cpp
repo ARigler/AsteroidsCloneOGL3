@@ -1,32 +1,11 @@
 #include"../include/TextureManager.h"
-#include"Utilities.h"
+#include"../include/Utilities.h"
 #include<SDL.h>
 #include<SDL_image.h>
 #include<iostream>
 #include<SDL_ttf.h>
 
-void TextureManager::setColor(int index, Uint8 red, Uint8 green, Uint8 blue)
-{	TextureMetadata mTextureMetadata = fetchData(index);
-
-	mTextureMetadata.colorMod = { red, green, blue };
-	setData(index, mTextureMetadata);
-}
-
-void TextureManager::setBlendMode(int index, SDL_BlendMode blending) {
-	TextureMetadata mTextureMetadata = fetchData(index);
-
-	mTextureMetadata.blendMode = blending;
-	setData(index, mTextureMetadata);
-
-}
-
-void TextureManager::setAlpha(int index, Uint8 alpha) {
-	TextureMetadata mTextureMetadata = fetchData(index);
-
-	mTextureMetadata.alpha=alpha;
-	setData(index, mTextureMetadata);
-}
-
+/*
 void TextureManager::render(SDL_Renderer* renderer, int index, int x, int y, Uint8 alpha, ColorMod color, SDL_BlendMode blending, float scale, double angle, SDL_Rect* clip, SDL_Point* center, SDL_RendererFlip flip)
 {
 	if(index < textureList.size() && index >= 0) {
@@ -74,7 +53,9 @@ void TextureManager::render(SDL_Renderer* renderer, int index, int x, int y, Uin
 		SDL_Log("Index %s does not exist in the texture database.",std::to_string(index).c_str());
 	}
 }
+*/
 
+/*
 void TextureManager::render(SDL_Renderer* renderer, std::string text, int x, int y, Uint8 alpha, ColorMod color, SDL_BlendMode blending, float scale, double angle, SDL_Rect* clip, SDL_Point* center, SDL_RendererFlip flip)
 {
 	if (textTextureCache.find(text) != textTextureCache.end()) {
@@ -112,7 +93,9 @@ void TextureManager::render(SDL_Renderer* renderer, std::string text, int x, int
 		SDL_Log("Text %s does not exist in the texture database.", text.c_str());
 	}
 }
+*/
 
+/*
 void TextureManager::render(SDL_Renderer* renderer, SDL_Texture* mTexture, int x, int y, Uint8 alpha, ColorMod color, SDL_BlendMode blending, float scale, double angle, SDL_Rect* clip, SDL_Point* center, SDL_RendererFlip flip)
 {
 	SDL_Point size;
@@ -139,18 +122,7 @@ void TextureManager::render(SDL_Renderer* renderer, SDL_Texture* mTexture, int x
 	
 	mTexture = nullptr;
 }
-
-
-void TextureManager::setData(int index, TextureMetadata metaData) {
-	textureList[index].metaData = metaData;
-}
-
-TextureMetadata TextureManager::fetchData(int index) {
-	if (index < textureList.size() && index>=0)
-	{
-		return textureList[index].metaData;
-	}
-}
+*/
 
 TextMetadata TextureManager::fetchTextData(std::string text) {
 	if (textTextureCache.find(text) != textTextureCache.end()) {
@@ -158,7 +130,7 @@ TextMetadata TextureManager::fetchTextData(std::string text) {
 	}
 }
 
-
+/*
 bool TextureManager::loadFromFile(std::string path, SDL_Renderer* renderer,Uint8 alpha,ColorMod colorMod,SDL_BlendMode blending,ColorMod colorKey)
 {
 	//The final texture
@@ -211,6 +183,7 @@ bool TextureManager::loadFromFile(std::string path, SDL_Renderer* renderer,Uint8
 	}
 	return success;
 }
+*/
 
 bool TextureManager::loadFromRenderedText(std::string textInput, TTF_Font* gFont, SDL_Renderer* renderer, SDL_Color textColor)
 {
@@ -251,12 +224,72 @@ bool TextureManager::loadFromRenderedText(std::string textInput, TTF_Font* gFont
 	return success;
 }
 
+Shader* TextureManager::getShader(int index) {
+	if (index < shaderList.size() && index >= 0) {
+		return shaderList[index];
+	}
+}
+
+Texture* TextureManager::getTexture(int index) {
+	if (index < textureList.size() && index >= 0) {
+		return textureList[index];
+	}
+}
+
+
+bool TextureManager::loadTexture(std::string path) {
+	Texture* texture = new Texture();
+	texture->Load(path);
+	textureList.push_back(texture);
+	return true;
+}
+
+bool TextureManager::loadShaders(std::string vertPath, std::string fragPath) {
+	Shader* shader = new Shader();
+	if (!shader->Load(vertPath, fragPath)) {
+		return false;
+	}
+	shaderList.push_back(shader);
+	shader->SetActive();
+}
+
+void TextureManager::setActiveShader(int index) {
+	if (index < shaderList.size() && index >= 0) {
+		shaderList[index]->SetActive();
+	}
+}
+
+void TextureManager::setActiveVertexArray(int index) {
+	if (index < vertexArrayList.size() && index >= 0) {
+		vertexArrayList[index]->setActive();
+	}
+}
+
 void TextureManager::removeIndex(int index) {
 	//if the index is in the vector
-	if (index < textureList.size())
+	if (index < textureList.size()&&index>=0)
 	{
-		SDL_DestroyTexture(textureList[index].texture);
+		textureList[index]->Unload();
+		delete textureList[index];
 		textureList.erase(textureList.begin() + index);
+	}
+}
+
+void TextureManager::removeShader(int index) {
+	//if the index is in the vector
+	if (index < shaderList.size() && index >= 0)
+	{
+		delete shaderList[index];
+		shaderList.erase(shaderList.begin() + index);
+	}
+}
+
+void TextureManager::removeVertexArray(int index) {
+	//if the index is in the vector
+	if (index < vertexArrayList.size() && index >= 0)
+	{
+		delete vertexArrayList[index];
+		vertexArrayList.erase(vertexArrayList.begin() + index);
 	}
 }
 
@@ -269,10 +302,34 @@ void TextureManager::removeText(std::string textInput) {
 	}
 }
 
+void TextureManager::createSpriteVerts() {
+	float vertices[] = {
+		-0.5f,0.5f,0.f,0.f,0.f,
+		0.5f,0.5f,0.f,1.f,0.f,
+		0.5f,-0.5f,0.f,1.f,1.f,
+		-0.5f,-0.5f,0.f,0.f,1.f,
+	};
+
+	unsigned int indices[] = {
+		0,1,2,
+		2,3,0
+	};
+	vertexArrayList.push_back(new VertexArray(vertices, 4, indices, 6));
+}
+
 TextureManager::~TextureManager() {
 	//deallocate every pointer in the vectors' lists and remove every entry
 	for (int i = textureList.size()-1; i >= 0; i--) {
 		removeIndex(i);
+	}
+	//deallocate every shader
+	for (int i = shaderList.size() - 1; i >= 0; i--) {
+		shaderList[i]->Unload();
+		removeShader(i);
+	}
+	//deallocate every vertex array
+	for (int i = vertexArrayList.size() - 1; i >= 0; i--) {
+		removeVertexArray(i);
 	}
 	//deallocate every pointer in the unordered_map's lists and remove every entry
 	for (auto& pair : textTextureCache) {

@@ -18,6 +18,7 @@ public:
 	Engine operator=(const Engine&) = delete;
 	~Engine() { close(); }
 	SDL_Renderer* pass_renderer() { return gRenderer; }
+	SDL_Window* pass_window() { return gWindow; }
 	const int SCREEN_WIDTH = 800;
 	const int SCREEN_HEIGHT = 600;
 private:
@@ -25,6 +26,7 @@ private:
 	void close();
 	SDL_Window* gWindow;
 	SDL_Renderer* gRenderer;
+	SDL_GLContext mContext;
 	static inline Engine* instance=nullptr;
 	Engine(){
 		if(!init())

@@ -1,10 +1,12 @@
 #include "../include/Engine.h"
 #include "../include/Game.h"
 #include "../include/Utilities.h"
+#include "../include/TextureManager.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
 #include <SDL_image.h>
+#include<gl/glew.h>
 
 bool Engine::init() {
 	//Initialization flag
@@ -24,52 +26,46 @@ bool Engine::init() {
 			printf("Warning: Linear texture filtering not enabled!");
 		}
 	}
+	//use core OpenGL profile
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	//specify version 3.3
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	//Request a color buffer with 8-bits per RGBA channel
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+	//Enable double-buffering
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	//Force OpenGL to use hardware acceleration
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
 	//Create window
-	gWindow = SDL_CreateWindow("SDL2 Asteroids", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	gWindow = SDL_CreateWindow("SDL2 Asteroids", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL);
 	if (gWindow == NULL)
 	{
 		printf("Window could not be created! %s\n", SDL_GetError());
 		success = false;
 	}
 	else
-	{
-		//Create renderer for window
-		gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
-		if (gRenderer == NULL)
-		{
-			printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
+	{	
+		mContext = SDL_GL_CreateContext(gWindow);
+		//init glew(experimental)
+		glewExperimental = GL_TRUE;
+		if (glewInit() != GLEW_OK) {
+			SDL_Log("Failed to initialize GLEW");
 			success = false;
 		}
-		else
-		{
-			//Initialize renderer color
-			SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		glGetError();//sometimes benign error code, so clear it.
 
-			//initialize SDL_Image
-			int imgFlags = IMG_INIT_PNG;
-			if (!(IMG_Init(imgFlags) & imgFlags))
-			{
-				printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
-				success = false;
-			}
-			//Initialize SDL_ttf
-			if (TTF_Init() == -1)
-			{
-				printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
-				success = false;
-			}
-			//Initialize SDL_Mixer
-			if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
-			{
-				printf("SDL_mixer could not initialize! %s\n", Mix_GetError());
-				success = false;
-			}
-		}
+		TextureManager* texMan = TextureManager::getInstance();
 	}
 	return success;
 }
 
 void Engine::close() {
+	SDL_GL_DeleteContext(mContext);
 	SDL_DestroyRenderer(gRenderer);
 	SDL_DestroyWindow(gWindow);
 	gRenderer = NULL;

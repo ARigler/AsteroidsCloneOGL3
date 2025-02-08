@@ -5,7 +5,7 @@
 #include"../include/AudioManager.h"
 #include"../include/Component.h"
 #include"../include/Random.h"
-#include"Math.h"
+#include"../include/Math.h"
 #include<iostream>
 #include<string>
 #include<algorithm>
@@ -15,6 +15,8 @@
 #include<SDL_ttf.h>
 #include<map>
 #include<functional>
+#include<gl/glew.h>
+#include<GL/GL.h>
 
 
 Game::~Game() {
@@ -51,15 +53,21 @@ void Game::remove_actor(Actor* actor) {
 bool Game::loadMedia() {
 	bool success = true;
 
-	gFont = TTF_OpenFont("assets/lucon.ttf", 28);
-	if (gFont == NULL) {
-		SDL_Log("Failed to load lucida console font! SDL_ttf Error: %s\n", TTF_GetError());
-		success = false;
-	}
-	SDL_Renderer* renderer = Engine::getInstance()->pass_renderer();
+	//gFont = TTF_OpenFont("assets/lucon.ttf", 28);
+	//if (gFont == NULL) {
+	//	SDL_Log("Failed to load lucida console font! SDL_ttf Error: %s\n", TTF_GetError());
+	//	success = false;
+	//}
+	//SDL_Renderer* renderer = Engine::getInstance()->pass_renderer();
 	TextureManager* texMan = TextureManager::getInstance();
 	AudioManager* audMan = AudioManager::getInstance();
-	texMan->loadFromFile("assets/Ship 3.png", renderer);
+	
+	texMan->loadTexture("assets/Ship 3.png");
+	texMan->loadTexture("assets/Space.png");
+	texMan->loadTexture("assets/A1.png");
+	texMan->loadTexture("assets/A2.png");
+	texMan->loadTexture("assets/P7.png");
+	/*texMan->loadFromFile("assets/Ship 3.png", renderer);
 	texMan->loadFromFile("assets/Space.png", renderer);
 	texMan->loadFromFile("assets/A1.png", renderer);
 	texMan->loadFromFile("assets/A2.png", renderer);
@@ -67,15 +75,15 @@ bool Game::loadMedia() {
 	texMan->loadFromFile("assets/M1.png", renderer);
 	texMan->loadFromFile("assets/M4.png", renderer);
 	texMan->loadFromFile("assets/P9.png", renderer);
-	texMan->loadFromFile("assets/P10.png", renderer);
+	texMan->loadFromFile("assets/P10.png", renderer);*/
 
-	texMan->loadFromRenderedText("Score: ",gFont,renderer);
-	texMan->loadFromRenderedText(std::to_string(mScore), gFont, renderer);
+	//texMan->loadFromRenderedText("Score: ",gFont,renderer);
+	//texMan->loadFromRenderedText(std::to_string(mScore), gFont, renderer);
 
-	audMan->loadClipFromFile("assets/151021__bubaproducer__laser-shot-big-3.wav");
-	audMan->loadClipFromFile("assets/446624__idkmrgarcia__explosion2.wav");
+	//audMan->loadClipFromFile("assets/151021__bubaproducer__laser-shot-big-3.wav");
+	//audMan->loadClipFromFile("assets/446624__idkmrgarcia__explosion2.wav");
 
-	renderer = nullptr;
+	//renderer = nullptr;
 
 	return success;
 }
@@ -98,6 +106,8 @@ bool Game::init() {
 	mPendingActors = std::vector<Actor*>();
 	mDeadActors = std::vector<Actor*>();
 	mRenderLookupTable = std::multimap<int, SpriteComponent*>();
+
+	TextureManager* texMan = TextureManager::getInstance();
 
 	Ship* ship = new Ship(this, Vector2(Engine::getInstance()->SCREEN_WIDTH / 2.0f, Engine::getInstance()->SCREEN_HEIGHT / 2.0f), 1.0f);
 	WarpZone* warp = new WarpZone(this);
@@ -212,17 +222,28 @@ void Game::render() {
 	SDL_Renderer* gRenderer = Engine::getInstance()->pass_renderer();
 	int viewPortWidth = Engine::getInstance()->SCREEN_WIDTH;
 	int viewPortHeight = Engine::getInstance()->SCREEN_HEIGHT;
-	SDL_SetRenderDrawColor(gRenderer, 0x33, 0x33, 0x33, 0xFF);
-	SDL_RenderClear(gRenderer);
-
 	TextureManager* texMan = TextureManager::getInstance();
-	//painter's algorithm
-	//iterate through render lookup table and draw
+
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	//SDL_SetRenderDrawColor(gRenderer, 0x33, 0x33, 0x33, 0xFF);
+	//SDL_RenderClear(gRenderer);
+
+	/*
 	double angle;
 	int x, y, w, h;
+	//painter's algorithm
+	//iterate through render lookup table and draw
+	*/
 	for (Actor* actor : mActors) {
+		SDL_Log("actor %p", actor);
 		auto components = actor->getComponents();
 		for (Component* component : components) {
+			SDL_Log("component %p", component);
 			if (component->get_cType() == ComponentType::SpriteComponent) {
 				SpriteComponent* spriteComponent = dynamic_cast<SpriteComponent*>(component);
 				int drawOrder = spriteComponent->getDrawOrder();
@@ -237,19 +258,24 @@ void Game::render() {
 			}
 		}
 	}
+	
 	for (auto element : mRenderLookupTable) {
-		angle = Math::ToDegrees(element.second->passOwner()->getRot());
+		//angle = Math::ToDegrees(element.second->passOwner()->getRot());
 		//render static image
-		element.second->Draw(texMan, angle);
+		element.second->Draw(texMan);
 	}
-
-	texMan->render(gRenderer, "Score: ", (3 * viewPortWidth) / 4, 50);
-	texMan->render(gRenderer, std::to_string(mScore), ((3 * viewPortWidth) / 4)+120, 52);
 
 	mRenderLookupTable.clear();
 
+	/*
+	texMan->render(gRenderer, "Score: ", (3 * viewPortWidth) / 4, 50);
+	texMan->render(gRenderer, std::to_string(mScore), ((3 * viewPortWidth) / 4)+120, 52);
+	
+	*/		
+
 	//Update screen
-	SDL_RenderPresent(gRenderer);
+	SDL_GL_SwapWindow(Engine::getInstance()->pass_window());
+	//SDL_RenderPresent(gRenderer);
 	gRenderer = nullptr;
 }
 

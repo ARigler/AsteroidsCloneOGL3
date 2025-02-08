@@ -19,15 +19,48 @@ void Component::update(float deltaTime) {
 
 }
 
-void SpriteComponent::Draw(TextureManager* textureManager, double angle,SDL_RendererFlip renderFlip) {
+void SpriteComponent::Draw(TextureManager* textureManager) {
+	SDL_Log("Sprite Component draw");
+	Shader* shader = textureManager->getShader(0);
+	Texture* texture = textureManager->getTexture(texIndex);
+	if (shader && texture) {
+		// Scale the quad by the width/height of texture
+		Matrix4 scaleMat = Matrix4::CreateScale(
+			static_cast<float>(mTexWidth),
+			static_cast<float>(mTexHeight),
+			1.0f);
+
+		Matrix4 world = scaleMat * mOwner->GetWorldTransform();
+
+		// Since all sprites use the same shader/vertices,
+		// the game first sets them active before any sprite draws
+
+		// Set world transform
+		shader->SetMatrixUniform("uWorldTransform", world);
+		// Set current texture
+		texture->SetActive();
+		// Draw quad
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+	}
+
+	/*
 	TextureMetadata mTextureMetadata = textureManager->fetchData(texIndex);
 	double adjustedAngle = angleOffset - angle;
-	textureManager->render(Engine::getInstance()->pass_renderer(), texIndex, mOwner->getPos().x, mOwner->getPos().y, mTextureMetadata.alpha, mTextureMetadata.colorMod, mTextureMetadata.blendMode,mOwner->getSca(),adjustedAngle);
+	//textureManager->render(Engine::getInstance()->pass_renderer(), texIndex, mOwner->getPos().x, mOwner->getPos().y, mTextureMetadata.alpha, mTextureMetadata.colorMod, mTextureMetadata.blendMode,mOwner->getSca(),adjustedAngle);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+	*/
+
 }
 
 void SpriteComponent::SetTexture(TextureManager* textureManager, int index) {
 	if (textureManager->fetchTextureListLength() > index && index >= 0) {
 		texIndex = index;
+		Texture* mTex = textureManager->getTexture(index);
+		if (mTex) {
+			mTexWidth = mTex->GetWidth();
+			mTexHeight = mTex->GetHeight();
+		}
 	}
 }
 
@@ -38,6 +71,8 @@ void SpriteComponent::setDrawOrder(TextureManager* textureManager, int drawOrder
 SpriteComponent::SpriteComponent(class Actor* owner, int texIndex, int drawOrder, int uO) : Component(owner, uO) {
 	mDrawOrder = drawOrder;
 	mOwner = owner;
+	mTexWidth = 0;
+	mTexHeight = 0;
 	SetTexture(TextureManager::getInstance(), texIndex);
 	cType = ComponentType::SpriteComponent;
 }
@@ -99,7 +134,32 @@ void AnimSpriteComponent::resetAnimation() {
 	currentCell.x = 0;
 }
 
-void AnimSpriteComponent::Draw(TextureManager* textureManager, double angle, SDL_RendererFlip renderFlip) {
+void AnimSpriteComponent::Draw(TextureManager* textureManager) {
+	SDL_Log("Anim Sprite Component draw");
+	Shader* shader = textureManager->getShader(0);
+	Texture* texture = textureManager->getTexture(texIndex);
+	if (shader && texture) {
+		// Scale the quad by the width/height of texture
+		Matrix4 scaleMat = Matrix4::CreateScale(
+			static_cast<float>(mTexWidth),
+			static_cast<float>(mTexHeight),
+			1.0f);
+
+		Matrix4 world = scaleMat * mOwner->GetWorldTransform();
+
+		// Since all sprites use the same shader/vertices,
+		// the game first sets them active before any sprite draws
+
+		// Set world transform
+		shader->SetMatrixUniform("uWorldTransform", world);
+		// Set current texture
+		texture->SetActive();
+		// Draw quad
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+	}
+
+	/*
 	TextureMetadata mTextureMetadata = textureManager->fetchData(texIndex);
 	Point adjustedStart = { mOffset.x + (currentCell.x * cellWidth),mOffset.y + (currentCell.y * cellHeight) };
 	SDL_Rect clip;
@@ -108,6 +168,7 @@ void AnimSpriteComponent::Draw(TextureManager* textureManager, double angle, SDL
 	double adjustedAngle = angleOffset-angle;
 	textureManager->render(Engine::getInstance()->pass_renderer(), texIndex, mOwner->getPos().x, mOwner->getPos().y, mTextureMetadata.alpha, mTextureMetadata.colorMod, mTextureMetadata.blendMode, mOwner->getSca(), adjustedAngle, clipP);
 	clipP = nullptr;
+	*/
 }
 
 void AnimSpriteComponent::addSequence(int length) {
@@ -154,6 +215,7 @@ BGSpriteComponent::BGSpriteComponent(Actor* owner, int texIndex, float clipW, fl
 }
 
 void BGSpriteComponent::update(float deltaTime) {
+	/*
 	float width = getWidth();
 	float height = getHeight();
 	if (mScrolling.xFlag) {
@@ -203,16 +265,19 @@ void BGSpriteComponent::update(float deltaTime) {
 				mOffset.y = 0;
 			}
 		}
-	}
+	}*/
 }
 
-void BGSpriteComponent::Draw(TextureManager* textureManager, double angle, SDL_RendererFlip renderFlip) {
+void BGSpriteComponent::Draw(TextureManager* textureManager) {
+
+	/*
 	TextureMetadata mTextureMetadata = textureManager->fetchData(texIndex);
 	SDL_Rect clip;
 	clip = { (int)mOffset.x,(int)mOffset.y,(int)mClipSize.x,(int)mClipSize.y };
 	SDL_Rect* clipP = &clip;
 	textureManager->render(Engine::getInstance()->pass_renderer(), texIndex, mOffset.x, mOffset.y, mTextureMetadata.alpha, mTextureMetadata.colorMod, mTextureMetadata.blendMode, mOwner->getSca(), angle, clipP);
 	clipP = nullptr;
+	*/
 }
 
 MoveComponent::MoveComponent(class Actor* owner, int uO) : Component(owner, uO) {

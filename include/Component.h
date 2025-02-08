@@ -30,6 +30,8 @@ public:
 	class Actor* passOwner() const { return mOwner; }
 	int get_uO() const { return mUpdateOrder; }
 	ComponentType get_cType() const { return cType; }
+	// Called when world transform changes
+	virtual void OnUpdateWorldTransform() { }
 protected:
 	class Actor* mOwner;
 	int mUpdateOrder;
@@ -39,26 +41,28 @@ protected:
 class SpriteComponent : public Component {
 public:
 	SpriteComponent(class Actor* owner, int texIndex,int drawOrder = 100, int uO=100);
-	virtual void Draw(TextureManager* textureManager,double angle,SDL_RendererFlip renderFlip = SDL_FLIP_NONE);
+	virtual void Draw(TextureManager* textureManager);
 	virtual void SetTexture(TextureManager* textureManager,int index);
 	int getTexIndex() const { return texIndex; }
 	int getDrawOrder() const { return mDrawOrder; }
+	int getTexWidth() const { return mTexWidth; }
+	int getTexHeight() const { return mTexHeight; }
 	void setDrawOrder(TextureManager* textureManager,int drawOrder);
-	int getWidth() const { return TextureManager::getInstance()->fetchData(texIndex).width; }
-	int getHeight() const { return TextureManager::getInstance()->fetchData(texIndex).height; }
 	float getAngleOffset()const { return angleOffset; }
 	void setAngleOffset(int thet) { angleOffset = thet; }
 protected:
 	int texIndex;
 	int mDrawOrder;
 	float angleOffset;
+	int mTexWidth;
+	int mTexHeight;
 };
 
 class AnimSpriteComponent : public SpriteComponent {
 public:
 	AnimSpriteComponent(class Actor* owner, int texIndex, int cWidth, int cHeight, int fps, bool loop = false, Point offset = {0,0},float aOffset=0.0f, int drawOrder = 100, int uO = 100);
 	void update(float deltaTime) override;
-	void Draw(TextureManager* textureManager, double angle, SDL_RendererFlip renderFlip = SDL_FLIP_NONE) override;
+	void Draw(TextureManager* textureManager) override;
 	void setTexIndex(TextureManager* texMan,int index) { texIndex=index; }
 	float getAnimFPS()const { return fps; }
 	Point getOffset()const { return mOffset; }
@@ -90,7 +94,7 @@ class BGSpriteComponent : public SpriteComponent {
 public:
 	BGSpriteComponent(class Actor* owner, int texIndex, float clipW, float clipH, float scrollSpeedX, float scrollSpeedY, int drawOrder = 100, int uO = 100);
 	void update(float deltaTime) override;
-	void Draw(TextureManager* textureManager, double angle, SDL_RendererFlip renderFlip = SDL_FLIP_NONE) override;
+	void Draw(TextureManager* textureManager) override;
 	void setTexIndex(TextureManager* texMan, int index) {
 		if (texMan->fetchTextureListLength() > index && index >= 0) {
 			texIndex = index;

@@ -45,14 +45,18 @@ public:
 	virtual void updateActor(float deltaTime);
 	void processInput(const uint8_t* keyState);
 	virtual void actorInput(const uint8_t* keyState);
+	void ComputeWorldTransform();
+	const Matrix4& GetWorldTransform() const { return mWorldTransform; }
 	ActorType get_aType()const { return aType; }
 private:
 	EngineState eState;
 	Vector2 mPos;
+	Matrix4 mWorldTransform;
 	float mScale;
 	float mRotation;
 	std::vector<Component*> mComponents;
 	ActorType aType;
+	bool mRecomputeWorldTransform;
 	class Game* mGame;
 };
 

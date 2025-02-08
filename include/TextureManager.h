@@ -7,26 +7,9 @@
 #include<string>
 #include<unordered_map>
 #include"Structures.h"
-
-struct ColorMod {
-	Uint8 red;
-	Uint8 green;
-	Uint8 blue;
-};
-
-struct TextureMetadata {
-	int texIndex;
-	int width;
-	int height;
-	ColorMod colorMod;
-	SDL_BlendMode blendMode;
-	Uint8 alpha;
-};
-
-struct TextureData {
-	SDL_Texture* texture;
-	TextureMetadata metaData;
-};
+#include"Shader.h"
+#include"VertexArray.h"
+#include"Texture.h"
 
 struct TextMetadata {
 	int width;
@@ -55,31 +38,41 @@ public:
 	}
 	TextureManager(const TextureManager&) = delete;
 	TextureManager operator=(const TextureManager&) = delete;
-	//Set color modulation
-	void setColor(int index, Uint8 red, Uint8 green, Uint8 blue);
-	//Set Blending
-	void setBlendMode(int index, SDL_BlendMode blending);
-	//Set Alpha Modulation
-	void setAlpha(int index, Uint8 alpha);
 	//Renders texture at given point
-	void render(SDL_Renderer* renderer, int index, int x, int y, Uint8 alpha = 0xFF, ColorMod color = { 0xFF,0xFF,0xFF }, SDL_BlendMode blending = SDL_BLENDMODE_BLEND, float scale=1.0f,double angle = 0.0, SDL_Rect* clip = NULL, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
-	void render(SDL_Renderer* renderer, std::string textString, int x, int y, Uint8 alpha = 0xFF, ColorMod color = { 0xFF,0xFF,0xFF }, SDL_BlendMode blending = SDL_BLENDMODE_BLEND, float scale = 1.0f, double angle = 0.0, SDL_Rect* clip = NULL, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
-	void render(SDL_Renderer* renderer, SDL_Texture* texturePointer, int x, int y, Uint8 alpha = 0xFF, ColorMod color = { 0xFF,0xFF,0xFF }, SDL_BlendMode blending = SDL_BLENDMODE_BLEND, float scale = 1.0f, double angle = 0.0, SDL_Rect* clip = NULL, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
-	bool loadFromFile(std::string path,SDL_Renderer* renderer, Uint8 alpha = 0xFF, ColorMod colorMod = { 0xFF,0xFF,0xFF }, SDL_BlendMode blending = SDL_BLENDMODE_BLEND, ColorMod colorKey={0,0xFF,0xFF});
+	//void render(SDL_Renderer* renderer, int index, int x, int y, Uint8 alpha = 0xFF, ColorMod color = { 0xFF,0xFF,0xFF }, SDL_BlendMode blending = SDL_BLENDMODE_BLEND, float scale=1.0f,double angle = 0.0, SDL_Rect* clip = NULL, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
+	//void render(SDL_Renderer* renderer, std::string textString, int x, int y, Uint8 alpha = 0xFF, ColorMod color = { 0xFF,0xFF,0xFF }, SDL_BlendMode blending = SDL_BLENDMODE_BLEND, float scale = 1.0f, double angle = 0.0, SDL_Rect* clip = NULL, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
+	//void render(SDL_Renderer* renderer, SDL_Texture* texturePointer, int x, int y, Uint8 alpha = 0xFF, ColorMod color = { 0xFF,0xFF,0xFF }, SDL_BlendMode blending = SDL_BLENDMODE_BLEND, float scale = 1.0f, double angle = 0.0, SDL_Rect* clip = NULL, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
+	//bool loadFromFile(std::string path,SDL_Renderer* renderer, Uint8 alpha = 0xFF, ColorMod colorMod = { 0xFF,0xFF,0xFF }, SDL_BlendMode blending = SDL_BLENDMODE_BLEND, ColorMod colorKey={0,0xFF,0xFF});
 	bool loadFromRenderedText(std::string textInput, TTF_Font* gFont, SDL_Renderer* renderer, SDL_Color textColor={0xFF,0xFF,0xFF});
+	bool loadShaders(std::string vertPath, std::string fragPath);
+	bool loadTexture(std::string path);
+	void setActiveShader(int index);
+	void setActiveVertexArray(int index);
+	void createSpriteVerts();
+	Shader* getShader(int index);
+	Texture* getTexture(int index);
+
 	void removeIndex(int index);
+	void removeShader(int index);
+	void removeVertexArray(int index);
 	void removeText(std::string textInput);
-	TextureMetadata fetchData(int index);
 	TextMetadata fetchTextData(std::string string);
 	int fetchTextureListLength()const { return textureList.size(); }
-	void setData(int index, TextureMetadata metadata);
 	~TextureManager();
 private:
-	std::vector<TextureData> textureList;
+	std::vector<Texture*> textureList;
 	std::unordered_map<std::string, TextData> textTextureCache;
+	std::vector<Shader*> shaderList;
+	std::vector<VertexArray*> vertexArrayList;
 	TextureManager() {
-		textureList = std::vector<TextureData>();
+		textureList = std::vector<Texture*>();
 		textTextureCache = std::unordered_map<std::string, TextData>();
+		shaderList = std::vector<Shader*>();
+		vertexArrayList = std::vector<VertexArray*>();
+		loadShaders("shaders/Sprite.vert", "shaders/Sprite.frag");
+		createSpriteVerts();
+		setActiveShader(0);
+		setActiveVertexArray(0);
 	}
 	inline static TextureManager* instance=nullptr;
 };

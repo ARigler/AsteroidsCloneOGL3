@@ -10,6 +10,7 @@ Actor::Actor(class Game* game,Vector2 pos, float scale, float rot) {
 	set_sca(scale);
 	set_rot(rot);
 	set_pos(pos);
+	mRecomputeWorldTransform = true;
 }
 
 Actor::~Actor() {
@@ -20,6 +21,7 @@ Actor::~Actor() {
 }
 
 void Actor::update(float deltaTime) {
+	ComputeWorldTransform();
 	updateActor(deltaTime);
 }
 
@@ -38,6 +40,24 @@ void Actor::processInput(const uint8_t* keyState) {
 
 void Actor::actorInput(const uint8_t* keyState)
 {
+}
+
+void Actor::ComputeWorldTransform()
+{
+	if (mRecomputeWorldTransform)
+	{
+		mRecomputeWorldTransform = false;
+		// Scale, then rotate, then translate
+		mWorldTransform = Matrix4::CreateScale(mScale);
+		mWorldTransform *= Matrix4::CreateRotationZ(mRotation);
+		mWorldTransform *= Matrix4::CreateTranslation(Vector3(mPos.x, mPos.y, 0.0f));
+
+		// Inform components world transform updated
+		for (auto comp : mComponents)
+		{
+			comp->OnUpdateWorldTransform();
+		}
+	}
 }
 
 Ship::Ship(class Game* game, Vector2 pos, float scale, float rot) :Actor(game, pos, scale, rot) {
