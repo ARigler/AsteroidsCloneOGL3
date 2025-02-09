@@ -20,10 +20,11 @@ void Component::update(float deltaTime) {
 }
 
 void SpriteComponent::Draw(TextureManager* textureManager) {
-	SDL_Log("Sprite Component draw");
 	Shader* shader = textureManager->getShader(0);
 	Texture* texture = textureManager->getTexture(texIndex);
 	if (shader && texture) {
+		SDL_Log("Sprite Component draw. mTexWidth %i, mTexHeight %i",mTexWidth,mTexHeight);
+
 		// Scale the quad by the width/height of texture
 		Matrix4 scaleMat = Matrix4::CreateScale(
 			static_cast<float>(mTexWidth),
@@ -44,12 +45,6 @@ void SpriteComponent::Draw(TextureManager* textureManager) {
 
 	}
 
-	/*
-	TextureMetadata mTextureMetadata = textureManager->fetchData(texIndex);
-	double adjustedAngle = angleOffset - angle;
-	//textureManager->render(Engine::getInstance()->pass_renderer(), texIndex, mOwner->getPos().x, mOwner->getPos().y, mTextureMetadata.alpha, mTextureMetadata.colorMod, mTextureMetadata.blendMode,mOwner->getSca(),adjustedAngle);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-	*/
 
 }
 
@@ -159,16 +154,6 @@ void AnimSpriteComponent::Draw(TextureManager* textureManager) {
 
 	}
 
-	/*
-	TextureMetadata mTextureMetadata = textureManager->fetchData(texIndex);
-	Point adjustedStart = { mOffset.x + (currentCell.x * cellWidth),mOffset.y + (currentCell.y * cellHeight) };
-	SDL_Rect clip;
-	clip = { adjustedStart.x,adjustedStart.y,cellWidth,cellHeight };
-	SDL_Rect* clipP = &clip;
-	double adjustedAngle = angleOffset-angle;
-	textureManager->render(Engine::getInstance()->pass_renderer(), texIndex, mOwner->getPos().x, mOwner->getPos().y, mTextureMetadata.alpha, mTextureMetadata.colorMod, mTextureMetadata.blendMode, mOwner->getSca(), adjustedAngle, clipP);
-	clipP = nullptr;
-	*/
 }
 
 void AnimSpriteComponent::addSequence(int length) {
@@ -289,7 +274,7 @@ void MoveComponent::update(float deltaTime) {
 	if (!Math::NearZero(mAngularSpeed))
 	{
 		float rot = passOwner()->getRot();
-		rot += mAngularSpeed * deltaTime;
+		rot -= mAngularSpeed * deltaTime;
 		mOwner->set_rot(rot);
 	}
 	if (!Math::NearZero(mForwardSpeed))
@@ -394,7 +379,7 @@ CircleComponent::CircleComponent(class Actor* owner)
 
 const Vector2& CircleComponent::GetCenter() const
 {
-	Vector2 center = Vector2(mOwner->getPos().x + GetRadius(), mOwner->getPos().y + GetRadius());
+	Vector2 center = Vector2(mOwner->getPos().x, mOwner->getPos().y);
 	return center;
 }
 
@@ -437,13 +422,13 @@ void WarpComponent::update(float deltaTime) {
 		if (actor->get_aType() != ActorType::WarpZone) {
 			Vector2 aPos = actor->getPos();
 			if (aPos.x > window.w + 50) {
-				actor->set_pos(Vector2(0, aPos.y));
+				actor->set_pos(Vector2(window.x, aPos.y));
 			}
 			else if (aPos.x < window.x-50) {
 				actor->set_pos(Vector2(window.w-20, aPos.y));
 			}
 			if (aPos.y > window.h+50) {
-				actor->set_pos(Vector2(aPos.x, 0));
+				actor->set_pos(Vector2(aPos.x, window.y));
 			}
 			else if (aPos.y < window.y-50) {
 				actor->set_pos(Vector2(aPos.x, window.h-20));

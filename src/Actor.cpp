@@ -23,6 +23,8 @@ Actor::~Actor() {
 void Actor::update(float deltaTime) {
 	ComputeWorldTransform();
 	updateActor(deltaTime);
+	mRecomputeWorldTransform = true;
+	ComputeWorldTransform();
 }
 
 void Actor::updateActor(float deltaTime) {
@@ -49,7 +51,7 @@ void Actor::ComputeWorldTransform()
 		mRecomputeWorldTransform = false;
 		// Scale, then rotate, then translate
 		mWorldTransform = Matrix4::CreateScale(mScale);
-		mWorldTransform *= Matrix4::CreateRotationZ(mRotation);
+		mWorldTransform *= Matrix4::CreateRotationZ(-mRotation);
 		mWorldTransform *= Matrix4::CreateTranslation(Vector3(mPos.x, mPos.y, 0.0f));
 
 		// Inform components world transform updated
@@ -128,7 +130,9 @@ Asteroid::Asteroid(class Game* game) :Actor(game) {
 	set_pos(randPos);
 	set_rot(Random::GetFloatRange(0.0f, Math::TwoPi));
 	set_sca(Random::GetFloatRange(0.5f, 3.0f));
-	addComponent(new SpriteComponent(this, 2));
+	SpriteComponent* sc = new SpriteComponent(this, 2);
+	sc->SetTexture(TextureManager::getInstance(),2);
+	addComponent(sc);
 	MoveComponent* mc = new MoveComponent(this);
 	addComponent(mc);
 	mc->setForwardSpeed(20.0f);
@@ -211,6 +215,7 @@ Laser::~Laser() {
 
 void Laser::updateActor(float deltaTime)
 {
+	noRender = false;
 	// If we run out of time, laser is dead
 	mDeathTimer -= deltaTime;
 	if (mDeathTimer <= 0.0f)
@@ -268,7 +273,7 @@ CircleComponent* Laser::GetCircle() {
 
 WarpZone::WarpZone(Game* game) : Actor(game) {
 	Engine* engine = Engine::getInstance();
-	WarpComponent* wc = new WarpComponent(this, 10,0,0,engine->SCREEN_WIDTH,engine->SCREEN_HEIGHT);
+	WarpComponent* wc = new WarpComponent(this, 10,-engine->SCREEN_WIDTH/2,-engine->SCREEN_HEIGHT/2,engine->SCREEN_WIDTH/2,engine->SCREEN_HEIGHT/2);
 	SpriteComponent* sc = new SpriteComponent(this, 1, 1,1);
 	addComponent(wc);
 	addComponent(sc);

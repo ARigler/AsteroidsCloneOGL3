@@ -39,11 +39,6 @@ public:
 	TextureManager(const TextureManager&) = delete;
 	TextureManager operator=(const TextureManager&) = delete;
 	//Renders texture at given point
-	//void render(SDL_Renderer* renderer, int index, int x, int y, Uint8 alpha = 0xFF, ColorMod color = { 0xFF,0xFF,0xFF }, SDL_BlendMode blending = SDL_BLENDMODE_BLEND, float scale=1.0f,double angle = 0.0, SDL_Rect* clip = NULL, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
-	//void render(SDL_Renderer* renderer, std::string textString, int x, int y, Uint8 alpha = 0xFF, ColorMod color = { 0xFF,0xFF,0xFF }, SDL_BlendMode blending = SDL_BLENDMODE_BLEND, float scale = 1.0f, double angle = 0.0, SDL_Rect* clip = NULL, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
-	//void render(SDL_Renderer* renderer, SDL_Texture* texturePointer, int x, int y, Uint8 alpha = 0xFF, ColorMod color = { 0xFF,0xFF,0xFF }, SDL_BlendMode blending = SDL_BLENDMODE_BLEND, float scale = 1.0f, double angle = 0.0, SDL_Rect* clip = NULL, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
-	//bool loadFromFile(std::string path,SDL_Renderer* renderer, Uint8 alpha = 0xFF, ColorMod colorMod = { 0xFF,0xFF,0xFF }, SDL_BlendMode blending = SDL_BLENDMODE_BLEND, ColorMod colorKey={0,0xFF,0xFF});
-	bool loadFromRenderedText(std::string textInput, TTF_Font* gFont, SDL_Renderer* renderer, SDL_Color textColor={0xFF,0xFF,0xFF});
 	bool loadShaders(std::string vertPath, std::string fragPath);
 	bool loadTexture(std::string path);
 	void setActiveShader(int index);
@@ -51,12 +46,11 @@ public:
 	void createSpriteVerts();
 	Shader* getShader(int index);
 	Texture* getTexture(int index);
-
+	VertexArray* getVA(int index);
 	void removeIndex(int index);
 	void removeShader(int index);
 	void removeVertexArray(int index);
 	void removeText(std::string textInput);
-	TextMetadata fetchTextData(std::string string);
 	int fetchTextureListLength()const { return textureList.size(); }
 	~TextureManager();
 private:

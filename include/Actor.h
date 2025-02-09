@@ -89,8 +89,10 @@ public:
 
 	class CircleComponent* GetCircle();
 	void updateActor(float deltaTime) override;
+	bool getRenderState()const { return noRender; }
 private:
 	float mDeathTimer;
+	bool noRender = true;
 };
 
 class WarpZone :public Actor {

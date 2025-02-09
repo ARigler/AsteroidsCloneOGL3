@@ -14,6 +14,7 @@ public:
 	void Unload();
 	// Set this as the active shader program
 	void SetActive();
+	void SetInt(std::string name, GLint v0);
 	// Sets a Matrix uniform
 	void SetMatrixUniform(const char* name, const Matrix4& matrix);
 private:

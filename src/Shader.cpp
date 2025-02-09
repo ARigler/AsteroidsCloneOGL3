@@ -59,6 +59,10 @@ void Shader::SetActive()
 	glUseProgram(mShaderProgram);
 }
 
+void Shader::SetInt(std::string name, GLint v0) {
+	glUniform1i(glGetUniformLocation(mShaderProgram, name.c_str()), 0);
+}
+
 void Shader::SetMatrixUniform(const char* name, const Matrix4& matrix)
 {
 	// Find the uniform by this name

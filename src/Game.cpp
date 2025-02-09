@@ -37,7 +37,7 @@ void Game::add_score(int scoreArg){
 	mScore += scoreArg;
 	TextureManager* texMan = TextureManager::getInstance();
 	Engine* engine = Engine::getInstance();
-	texMan->loadFromRenderedText(std::to_string(mScore), gFont, engine->pass_renderer());
+	//texMan->loadFromRenderedText(std::to_string(mScore), gFont, engine->pass_renderer());
 }
 
 
@@ -53,37 +53,26 @@ void Game::remove_actor(Actor* actor) {
 bool Game::loadMedia() {
 	bool success = true;
 
-	//gFont = TTF_OpenFont("assets/lucon.ttf", 28);
-	//if (gFont == NULL) {
-	//	SDL_Log("Failed to load lucida console font! SDL_ttf Error: %s\n", TTF_GetError());
-	//	success = false;
-	//}
-	//SDL_Renderer* renderer = Engine::getInstance()->pass_renderer();
 	TextureManager* texMan = TextureManager::getInstance();
 	AudioManager* audMan = AudioManager::getInstance();
-	
-	texMan->loadTexture("assets/Ship 3.png");
+	Shader* spriteShader = texMan->getShader(0);
+
+	spriteShader->SetActive();
+	texMan->loadTexture("assets/Ship1.png");
 	texMan->loadTexture("assets/Space.png");
 	texMan->loadTexture("assets/A1.png");
 	texMan->loadTexture("assets/A2.png");
 	texMan->loadTexture("assets/P7.png");
-	/*texMan->loadFromFile("assets/Ship 3.png", renderer);
-	texMan->loadFromFile("assets/Space.png", renderer);
-	texMan->loadFromFile("assets/A1.png", renderer);
-	texMan->loadFromFile("assets/A2.png", renderer);
-	texMan->loadFromFile("assets/P7.png", renderer);
-	texMan->loadFromFile("assets/M1.png", renderer);
-	texMan->loadFromFile("assets/M4.png", renderer);
-	texMan->loadFromFile("assets/P9.png", renderer);
-	texMan->loadFromFile("assets/P10.png", renderer);*/
 
-	//texMan->loadFromRenderedText("Score: ",gFont,renderer);
-	//texMan->loadFromRenderedText(std::to_string(mScore), gFont, renderer);
+	//spriteShader->SetInt("Ship3", 1);
+	//spriteShader->SetInt("Space", 1);
+	//spriteShader->SetInt("A1", 1);
+	//spriteShader->SetInt("A2", 1);
+	//spriteShader->SetInt("P7", 1);
 
-	//audMan->loadClipFromFile("assets/151021__bubaproducer__laser-shot-big-3.wav");
-	//audMan->loadClipFromFile("assets/446624__idkmrgarcia__explosion2.wav");
+	audMan->loadClipFromFile("assets/151021__bubaproducer__laser-shot-big-3.wav");
+	audMan->loadClipFromFile("assets/446624__idkmrgarcia__explosion2.wav");
 
-	//renderer = nullptr;
 
 	return success;
 }
@@ -109,7 +98,8 @@ bool Game::init() {
 
 	TextureManager* texMan = TextureManager::getInstance();
 
-	Ship* ship = new Ship(this, Vector2(Engine::getInstance()->SCREEN_WIDTH / 2.0f, Engine::getInstance()->SCREEN_HEIGHT / 2.0f), 1.0f);
+
+	Ship* ship = new Ship(this, Vector2(0, 0), 1.0f);
 	WarpZone* warp = new WarpZone(this);
 	add_actor(ship);
 	const int numAsteroids = 20;
@@ -166,7 +156,7 @@ void Game::update(float deltaTime) {
 	if (tick_gameOverTimer() > 150) {
 		stop_gameOverTimer();
 		reset_score();
-		Ship* ship = new Ship(this, Vector2(Engine::getInstance()->SCREEN_WIDTH / 2.0f, Engine::getInstance()->SCREEN_HEIGHT / 2.0f), 1.0f);
+		Ship* ship = new Ship(this, Vector2(0, 0), 1.0f);
 		add_actor(ship);
 	}
 
@@ -224,7 +214,7 @@ void Game::render() {
 	int viewPortHeight = Engine::getInstance()->SCREEN_HEIGHT;
 	TextureManager* texMan = TextureManager::getInstance();
 
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glEnable(GL_BLEND);
@@ -245,6 +235,12 @@ void Game::render() {
 		for (Component* component : components) {
 			SDL_Log("component %p", component);
 			if (component->get_cType() == ComponentType::SpriteComponent) {
+				if (actor->get_aType() == ActorType::Laser) {
+					Laser* laser = dynamic_cast<Laser*>(actor);
+					if (laser->getRenderState()) {
+						continue;
+					}
+				}
 				SpriteComponent* spriteComponent = dynamic_cast<SpriteComponent*>(component);
 				int drawOrder = spriteComponent->getDrawOrder();
 				mRenderLookupTable.insert({ drawOrder, spriteComponent });
@@ -259,9 +255,14 @@ void Game::render() {
 		}
 	}
 	
+	texMan->getShader(0)->SetActive();
+	texMan->getVA(0)->setActive();
+
+
 	for (auto element : mRenderLookupTable) {
 		//angle = Math::ToDegrees(element.second->passOwner()->getRot());
 		//render static image
+		SDL_Log("DrawOrder %i, function %p", element.first,element.second);
 		element.second->Draw(texMan);
 	}
 
